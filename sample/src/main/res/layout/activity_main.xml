@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    tools:context=".MainActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="140dp"
+                    android:layout_height="match_parent"
+                    android:autoSizeMaxTextSize="12sp"
+                    android:gravity="left|center_vertical"
+                    android:maxLines="2"
+                    android:text="申请网络权限" />
+
+                <TextView
+                    android:id="@+id/tv_1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:background="#78999999"
+                    android:gravity="center"
+                    android:text="非必须申请" />
+
+                <TextView
+                    android:id="@+id/tv_1_necessary"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:background="#78999999"
+                    android:gravity="center"
+                    android:text="必须申请" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="140dp"
+                    android:layout_height="match_parent"
+                    android:autoSizeMaxTextSize="12sp"
+                    android:gravity="left|center_vertical"
+                    android:maxLines="2"
+                    android:text="申请读取手机信息权限" />
+
+                <TextView
+                    android:id="@+id/tv_2"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:background="#78999999"
+                    android:gravity="center"
+                    android:text="非必须申请" />
+
+                <TextView
+                    android:id="@+id/tv_2_necessary"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:background="#78999999"
+                    android:gravity="center"
+                    android:text="必须申请" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="140dp"
+                    android:layout_height="match_parent"
+                    android:autoSizeMaxTextSize="12sp"
+                    android:gravity="left|center_vertical"
+                    android:maxLines="2"
+                    android:text="申请读取手机信息和SD卡读写权限" />
+
+                <TextView
+                    android:id="@+id/tv_3"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:background="#78999999"
+                    android:gravity="center"
+                    android:text="非必须申请" />
+
+                <TextView
+                    android:id="@+id/tv_3_necessary"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:background="#78999999"
+                    android:gravity="center"
+                    android:text="必须申请" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="140dp"
+                    android:layout_height="match_parent"
+                    android:autoSizeMaxTextSize="12sp"
+                    android:gravity="left|center_vertical"
+                    android:maxLines="2"
+                    android:text="申请麦克风权限,sd卡权限,悬浮窗权限" />
+
+                <TextView
+                    android:id="@+id/tv_4"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:background="#78999999"
+                    android:gravity="center"
+                    android:text="非必须申请" />
+
+                <TextView
+                    android:id="@+id/tv_4_necessary"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:background="#78999999"
+                    android:gravity="center"
+                    android:text="必须申请" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="140dp"
+                    android:layout_height="match_parent"
+                    android:autoSizeMaxTextSize="12sp"
+                    android:gravity="left|center_vertical"
+                    android:maxLines="2"
+                    android:text="申请摄像头,发送短信权限(自定义弹窗UI)" />
+
+                <TextView
+                    android:id="@+id/tv_5"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:background="#78999999"
+                    android:gravity="center"
+                    android:text="非必须申请" />
+
+                <TextView
+                    android:id="@+id/tv_5_necessary"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:background="#78999999"
+                    android:gravity="center"
+                    android:text="必须申请" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
