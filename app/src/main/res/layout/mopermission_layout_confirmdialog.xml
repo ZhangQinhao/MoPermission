@@ -53,7 +53,7 @@
             android:layout_height="40dp"
             android:layout_marginLeft="24dp"
             android:layout_weight="1"
-            android:background="@drawable/shape_corner_54_solid_ffd558_stroke_black_6"
+            android:background="@drawable/room_yellow_button_bg"
             android:gravity="center"
             android:textColor="#000000"
             android:textSize="16sp"
