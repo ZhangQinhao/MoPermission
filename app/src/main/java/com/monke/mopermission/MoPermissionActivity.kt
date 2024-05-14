@@ -27,7 +27,17 @@ class MoPermissionActivity : AppCompatActivity() {
         private const val INTENT_KEY_NO = "intent_key_no"
         private const val INTENT_KEY_UI = "intent_key_ui"
 
-        internal fun start(context: Context, necessary: Boolean, responseKey: String, title: String?, warnDesc: String?, yesStr: String?, noStr: String?, uiClass: Class<out MoPermissionBaseDialog>?, vararg permission: String) {
+        internal fun start(
+            context: Context,
+            necessary: Boolean,
+            responseKey: String,
+            title: String?,
+            warnDesc: String?,
+            yesStr: String?,
+            noStr: String?,
+            uiClass: Class<out MoPermissionBaseDialog>?,
+            vararg permission: String
+        ) {
             val intent = Intent(context, MoPermissionActivity::class.java)
             intent.putExtra(INTENT_KEY_NECESSARY, necessary)
             intent.putExtra(INTENT_KEY_RESPONSEKEY, responseKey)
@@ -74,6 +84,9 @@ class MoPermissionActivity : AppCompatActivity() {
             }
             if (permission!!.contains(Manifest.permission.WRITE_SETTINGS)) {
                 specialPermission.add(Manifest.permission.WRITE_SETTINGS)
+            }
+            if (permission!!.contains(Manifest.permission.BIND_ACCESSIBILITY_SERVICE)) {
+                specialPermission.add(Manifest.permission.BIND_ACCESSIBILITY_SERVICE);
             }
         }
         title = intent.getStringExtra(INTENT_KEY_TITLE)
@@ -122,7 +135,8 @@ class MoPermissionActivity : AppCompatActivity() {
                         }
                     }
                     if (noResultList.isNullOrEmpty()) {
-                        MoPermissionBus.getInstance()?.sendData(responseKey!!, permission!!.asList())
+                        MoPermissionBus.getInstance()
+                            ?.sendData(responseKey!!, permission!!.asList())
                         finish()
                         return
                     }
@@ -141,7 +155,8 @@ class MoPermissionActivity : AppCompatActivity() {
                         }
                     }
                     if (noResultList.isNullOrEmpty()) {
-                        MoPermissionBus.getInstance()?.sendData(responseKey!!, permission!!.asList())
+                        MoPermissionBus.getInstance()
+                            ?.sendData(responseKey!!, permission!!.asList())
                         finish()
                         return
                     }
@@ -158,7 +173,11 @@ class MoPermissionActivity : AppCompatActivity() {
 
     private var resultList: ArrayList<String>? = null
     private var noResultList: ArrayList<String>? = null
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         if (requestCode == 0x101 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             resultList = arrayListOf<String>()
             noResultList = arrayListOf<String>()
@@ -169,19 +188,41 @@ class MoPermissionActivity : AppCompatActivity() {
                     var i = permissions.get(index = index)
                     when (i) {
                         Manifest.permission.WRITE_SETTINGS -> {
-                            if (MoPermission.checkPermission(this, Manifest.permission.WRITE_SETTINGS)) {
+                            if (MoPermission.checkPermission(
+                                    this,
+                                    Manifest.permission.WRITE_SETTINGS
+                                )
+                            ) {
                                 resultList?.add(i)
                             } else {
                                 noResultList?.add(i)
                             }
                         }
+
                         Manifest.permission.SYSTEM_ALERT_WINDOW -> {
-                            if (MoPermission.checkPermission(this, Manifest.permission.SYSTEM_ALERT_WINDOW)) {
+                            if (MoPermission.checkPermission(
+                                    this,
+                                    Manifest.permission.SYSTEM_ALERT_WINDOW
+                                )
+                            ) {
                                 resultList?.add(i)
                             } else {
                                 noResultList?.add(i)
                             }
                         }
+
+                        Manifest.permission.BIND_ACCESSIBILITY_SERVICE -> {
+                            if (MoPermission.checkPermission(
+                                    this,
+                                    Manifest.permission.BIND_ACCESSIBILITY_SERVICE
+                                )
+                            ) {
+                                resultList?.add(i)
+                            } else {
+                                noResultList?.add(i)
+                            }
+                        }
+
                         else -> {
                             noResultList?.add(i)
                         }
@@ -241,12 +282,24 @@ class MoPermissionActivity : AppCompatActivity() {
                 when {
                     Manifest.permission.SYSTEM_ALERT_WINDOW == noResultList!![0] -> {
                         //悬浮窗权限 单独处理
-                        startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
+                        startActivity(
+                            Intent(
+                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                Uri.parse("package:$packageName")
+                            )
+                        )
                     }
+
                     Manifest.permission.WRITE_SETTINGS == noResultList!![0] -> {
                         //系统设置权限 单独处理
-                        startActivity(Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri.parse("package:$packageName")))
+                        startActivity(
+                            Intent(
+                                Settings.ACTION_MANAGE_WRITE_SETTINGS,
+                                Uri.parse("package:$packageName")
+                            )
+                        )
                     }
+
                     else -> {
                         requestPermissionSetting(this)
                     }
@@ -297,12 +350,18 @@ class MoPermissionActivity : AppCompatActivity() {
                     }
                     showDialog(t, warnDesc, yesStr, noStr, View.OnClickListener {
                         jumpToSystem = true
-                        startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
+                        startActivity(
+                            Intent(
+                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                Uri.parse("package:$packageName")
+                            )
+                        )
                     }, View.OnClickListener {
                         dismissDialog()
                         specialCheckDialog()
                     })
                 }
+
                 Manifest.permission.WRITE_SETTINGS -> {
                     var t = getString(R.string.mopermission_system_default)
                     if (!TextUtils.isEmpty(title)) {
@@ -310,12 +369,36 @@ class MoPermissionActivity : AppCompatActivity() {
                     }
                     showDialog(t, warnDesc, yesStr, noStr, View.OnClickListener {
                         jumpToSystem = true
-                        startActivity(Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri.parse("package:$packageName")))
+                        startActivity(
+                            Intent(
+                                Settings.ACTION_MANAGE_WRITE_SETTINGS,
+                                Uri.parse("package:$packageName")
+                            )
+                        )
                     }, View.OnClickListener {
                         dismissDialog()
                         specialCheckDialog()
                     })
                 }
+
+                Manifest.permission.BIND_ACCESSIBILITY_SERVICE -> {
+                    var t = getString(R.string.mopermission_accessibility_default)
+                    if (!TextUtils.isEmpty(title)) {
+                        t = title!!
+                    }
+                    showDialog(t, warnDesc, yesStr, noStr, View.OnClickListener {
+                        jumpToSystem = true
+                        startActivity(
+                            Intent(
+                                Settings.ACTION_ACCESSIBILITY_SETTINGS
+                            )
+                        )
+                    }, View.OnClickListener {
+                        dismissDialog()
+                        specialCheckDialog()
+                    })
+                }
+
                 else -> {
                     specialCheckDialog()
                 }
@@ -335,7 +418,10 @@ class MoPermissionActivity : AppCompatActivity() {
                 localIntent.data = Uri.fromParts("package", from.packageName, null)
             } else if (Build.VERSION.SDK_INT <= 8) {
                 localIntent.action = Intent.ACTION_VIEW
-                localIntent.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails")
+                localIntent.setClassName(
+                    "com.android.settings",
+                    "com.android.settings.InstalledAppDetails"
+                )
                 localIntent.putExtra("com.android.settings.ApplicationPkgName", from.packageName)
             }
             from.startActivity(localIntent)
@@ -345,7 +431,14 @@ class MoPermissionActivity : AppCompatActivity() {
     }
 
     var moPermissionDialog: MoPermissionBaseDialog? = null
-    private fun showDialog(title: String?, desc: String?, yesStr: String?, noStr: String?, yesClickListener: View.OnClickListener, noClickListener: View.OnClickListener) {
+    private fun showDialog(
+        title: String?,
+        desc: String?,
+        yesStr: String?,
+        noStr: String?,
+        yesClickListener: View.OnClickListener,
+        noClickListener: View.OnClickListener
+    ) {
         if (moPermissionDialog == null) {
             moPermissionDialog = if (uiClass == null) {
                 MoPermissionDialog(this)

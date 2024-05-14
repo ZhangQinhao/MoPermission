@@ -29,6 +29,42 @@ public class MainActivity extends AppCompatActivity {
         initSDMICWINDOW();
         //摄像头与发送短信权限测试(自定义二次确认弹窗UI)
         initCameraMSG();
+        //申请无障碍权限
+        initAccessibiliity();
+    }
+
+    private void initAccessibiliity() {
+        findViewById(R.id.tv_6).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MoPermission.Companion.requestPermission(MainActivity.this, "权限申请", "获取无障碍权限", "申请", "取消", new OnRequestPermissionListener() {
+                    @Override
+                    public void requestPermission(List<String> permissions) {
+                        if (permissions.size() >= 1) {
+                            showToast("已获取无障碍权限");
+                        } else {
+                            showToast("未获取无障碍权限");
+                        }
+                    }
+                }, null, Manifest.permission.BIND_ACCESSIBILITY_SERVICE);
+            }
+        });
+        findViewById(R.id.tv_6_necessary).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MoPermission.Companion.requestNecessaryPermission(MainActivity.this, "权限申请", "获取无障碍权限", "申请", "退出", new OnRequestNecessaryPermissionListener() {
+                    @Override
+                    public void success(List<String> permissions) {
+                        showToast("已获取无障碍权限");
+                    }
+
+                    @Override
+                    public void fail(List<String> permissions) {
+                        showToast("未获取无障碍权限");
+                    }
+                }, null, Manifest.permission.BIND_ACCESSIBILITY_SERVICE);
+            }
+        });
     }
 
     private void initCameraMSG() {

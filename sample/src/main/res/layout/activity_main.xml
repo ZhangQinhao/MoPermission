@@ -190,6 +190,40 @@
                     android:gravity="center"
                     android:text="必须申请" />
             </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="140dp"
+                    android:layout_height="match_parent"
+                    android:autoSizeMaxTextSize="12sp"
+                    android:gravity="left|center_vertical"
+                    android:maxLines="2"
+                    android:text="申请无障碍权限" />
+
+                <TextView
+                    android:id="@+id/tv_6"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:background="#78999999"
+                    android:gravity="center"
+                    android:text="非必须申请" />
+
+                <TextView
+                    android:id="@+id/tv_6_necessary"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:background="#78999999"
+                    android:gravity="center"
+                    android:text="必须申请" />
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
