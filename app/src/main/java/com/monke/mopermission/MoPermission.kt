@@ -1,13 +1,9 @@
 package com.monke.mopermission
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import android.provider.Settings
-import android.view.accessibility.AccessibilityManager
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.Observer
 import java.util.UUID
 
@@ -23,6 +19,14 @@ open class MoPermission {
             }
             sdkInt = Build.VERSION.SDK_INT
             return sdkInt
+        }
+
+        val moPermissionAdapter: MoPermissionSpecialAdapter =
+            MoPermissionSpecialAdapter()
+
+        @JvmStatic
+        fun registerPermissionAdapter(moAdapter: MoPermissionBaseAdapter) {
+            moPermissionAdapter.setSpecialPermissionAdapter(moAdapter)
         }
 
         /**
@@ -200,27 +204,12 @@ open class MoPermission {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                 return true
             } else {
-                return when (permission) {
-                    Manifest.permission.WRITE_SETTINGS -> {
-                        Settings.System.canWrite(context)
-                    }
-
-                    Manifest.permission.SYSTEM_ALERT_WINDOW -> {
-                        Settings.canDrawOverlays(context)
-                    }
-
-                    Manifest.permission.BIND_ACCESSIBILITY_SERVICE -> {
-                        (context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager?)?.let {
-                            return it.isEnabled
-                        }?:run {
-                            return false
-                        }
-                    }
-
-                    else -> {
-                        val result = context.checkSelfPermission(permission)
-                        result == PackageManager.PERMISSION_GRANTED
-                    }
+                val specialResult = moPermissionAdapter.checkPermission(context, permission)
+                if (specialResult == 0) {
+                    val result = context.checkSelfPermission(permission)
+                    return result == PackageManager.PERMISSION_GRANTED
+                } else {
+                    return specialResult > 0
                 }
             }
         }

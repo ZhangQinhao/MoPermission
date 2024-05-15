@@ -1,8 +1,12 @@
 package com.monke.mopermissionsample;
 
 import android.Manifest;
+import android.content.Context;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,6 +35,24 @@ public class MainActivity extends AppCompatActivity {
         initCameraMSG();
         //申请无障碍权限
         initAccessibiliity();
+
+        Log.d("MONKE111", Settings.Secure.getString(
+                getContentResolver(),
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES));
+        AccessibilityManager accessibilityManager = (AccessibilityManager) getSystemService(Context.ACCESSIBILITY_SERVICE);
+        AccessibilityManager.AccessibilityStateChangeListener accessibilityStateChangeListener = new AccessibilityManager.AccessibilityStateChangeListener() {
+            @Override
+            public void onAccessibilityStateChanged(boolean enabled) {
+                if (enabled) {
+                    Log.d("MONKE", "无障碍权限已经开启");
+                } else {
+                    Log.d("MONKE", "无障碍权限未开启");
+                }
+            }
+        };
+
+// 注册监听器
+        accessibilityManager.addAccessibilityStateChangeListener(accessibilityStateChangeListener);
     }
 
     private void initAccessibiliity() {
