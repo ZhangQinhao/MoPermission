@@ -313,8 +313,9 @@ class MoPermissionActivity : AppCompatActivity() {
             jumpToSystem = false
             checkPermissions()
             if (!needRequestNormalPermission() && !needRequestSpecialPermission()) {
-                MoPermissionBus.getInstance()
-                    ?.sendData(responseKey!!, getPermissionEnableList())
+                dismissDialog()
+                MoPermissionBus.getInstance()?.sendData(responseKey!!, getPermissionEnableList())
+                finish()
                 return
             }
             if (!dialogIsShow()) {
