@@ -35,10 +35,6 @@ public class MainActivity extends AppCompatActivity {
         initCameraMSG();
         //申请无障碍权限
         initAccessibiliity();
-
-        Log.d("MONKE111", Settings.Secure.getString(
-                getContentResolver(),
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES));
         AccessibilityManager accessibilityManager = (AccessibilityManager) getSystemService(Context.ACCESSIBILITY_SERVICE);
         AccessibilityManager.AccessibilityStateChangeListener accessibilityStateChangeListener = new AccessibilityManager.AccessibilityStateChangeListener() {
             @Override

@@ -22,7 +22,7 @@ public class MoPermissionSpecialAdapter extends MoPermissionBaseAdapter {
         if (specialPermissionAdapter != null) {
             result = specialPermissionAdapter.isSpecialPermission(permission);
         }
-        if (result != 0) {
+        if (result > 0) {
             return result;
         }
         if (TextUtils.equals(permission, Manifest.permission.WRITE_SETTINGS)) {

@@ -50,6 +50,45 @@ MoPermission.Companion.requestNecessaryPermission(MainActivity.this, "权限申�
                 }, CustomPermissionDialog.class, Manifest.permission.CAMERA, Manifest.permission.SEND_SMS);
 ```
 
+#### 自定义特殊权限适配器
+``` stylus
+MoPermission.registerPermissionAdapter(new MoPermissionBaseAdapter() {
+            @Override
+            public int isSpecialPermission(String permission) {
+                if (TextUtils.equals(permission, Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)) {
+                    return 1;
+                }
+                return 0;
+            }
+
+            @Override
+            public int checkPermission(Context context, String permission) {
+                if (TextUtils.equals(permission, Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        return ((PowerManager) getSystemService(Context.POWER_SERVICE)).isIgnoringBatteryOptimizations(context.getPackageName()) ? 1 : -1;
+                    } else {
+                        return 1;
+                    }
+                }
+                return 0;
+            }
+
+            @Override
+            public boolean requestPermission(Context context, String permission) {
+                if (TextUtils.equals(permission, Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)) {
+                    try {
+                        Intent intent = new Intent(ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                        intent.setData(Uri.parse("package:" + context.getPackageName()));
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                return false;
+            }
+        });
+```
+
 
 #### 弹窗样式自定义修改
 继承实现 MoPermissionBaseDialog 相关方法并定制UI，可参考MoPermissionDialog或者Sample中CustomPermissionDialog  

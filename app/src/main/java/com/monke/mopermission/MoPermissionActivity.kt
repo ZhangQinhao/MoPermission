@@ -12,6 +12,8 @@ import android.text.TextUtils
 import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 
 @RequiresApi(Build.VERSION_CODES.M)
 class MoPermissionActivity : AppCompatActivity() {
@@ -53,13 +55,13 @@ class MoPermissionActivity : AppCompatActivity() {
 
     private var necessary: Boolean = false
     private var responseKey: String? = null
-    private var permission: Array<String>? = null
-    private var specialPermission = arrayListOf<String>() //非必须前提下 特殊权限申请(用来控制次数)
     private var title: String? = null
     private var warnDesc: String? = null
     private var yesStr: String? = null
     private var noStr: String? = null
-    private var uiClass: Class<out MoPermissionBaseDialog>? = null  //
+    private var uiClass: Class<out MoPermissionBaseDialog>? = null
+    private val normalPermission = arrayListOf<RequestPermissionData>()
+    private val specialPermission = arrayListOf<RequestPermissionData>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,16 +75,16 @@ class MoPermissionActivity : AppCompatActivity() {
             finish()
             return
         }
-        permission = intent.getStringArrayExtra(INTENT_KEY_PERMISSION)
+        var permission = intent.getStringArrayExtra(INTENT_KEY_PERMISSION)
         if (permission == null || permission!!.isEmpty()) {
             finish()
             return
         }
-        if (!necessary) {
-            permission!!.forEach {
-                if (MoPermission.moPermissionAdapter.isSpecialPermission(it) > 0) {
-                    specialPermission.add(it)
-                }
+        permission!!.forEach {
+            if (MoPermission.moPermissionAdapter.isSpecialPermission(it) > 0) {
+                specialPermission.add(RequestPermissionData(it, true))
+            } else {
+                normalPermission.add(RequestPermissionData(it, false))
             }
         }
         title = intent.getStringExtra(INTENT_KEY_TITLE)
@@ -103,197 +105,153 @@ class MoPermissionActivity : AppCompatActivity() {
             }
         }
         uiClass = intent.getSerializableExtra(INTENT_KEY_UI) as Class<out MoPermissionBaseDialog>?
+        //检查权限
+        checkPermissions()
         //申请权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            requestPermissions()
+            //弹出对话框
+            showRequestPermissionDialog()
         } else {
             //不用申请权限
-            MoPermissionBus.getInstance()?.sendData(responseKey!!, permission!!.asList())
+            MoPermissionBus.getInstance()?.sendData(responseKey!!, getPermissionEnableList())
             finish()
             return
         }
     }
 
-    private var jumpToSystem: Boolean = false
-    override fun onResume() {
-        super.onResume()
-        if (jumpToSystem) {
-            jumpToSystem = false
-            if (necessary) {
-                if (dialogIsShow() && permission?.isNotEmpty() == true) {
-                    resultList = arrayListOf<String>()
-                    noResultList = arrayListOf<String>()
-                    for (item in permission!!) {
-                        if (MoPermission.checkPermission(this, item)) {
-                            resultList!!.add(item)
-                        } else {
-                            noResultList!!.add(item)
-                        }
-                    }
-                    if (noResultList.isNullOrEmpty()) {
-                        MoPermissionBus.getInstance()
-                            ?.sendData(responseKey!!, permission!!.asList())
-                        finish()
-                        return
-                    }
-                    doubleCheckDialog()
-                }
-            } else {
-                if (dialogIsShow() && permission?.isNotEmpty() == true) {
-                    dismissDialog()
-                    resultList = arrayListOf<String>()
-                    noResultList = arrayListOf<String>()
-                    for (item in permission!!) {
-                        if (MoPermission.checkPermission(this, item)) {
-                            resultList!!.add(item)
-                        } else {
-                            noResultList!!.add(item)
-                        }
-                    }
-                    if (noResultList.isNullOrEmpty()) {
-                        MoPermissionBus.getInstance()
-                            ?.sendData(responseKey!!, permission!!.asList())
-                        finish()
-                        return
-                    }
-                    specialCheckDialog()
-                }
-            }
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        MoPermissionBus.getInstance()?.removeLiveData(responseKey)
-    }
-
-    private var resultList: ArrayList<String>? = null
-    private var noResultList: ArrayList<String>? = null
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        if (requestCode == 0x101 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            resultList = arrayListOf<String>()
-            noResultList = arrayListOf<String>()
-            for ((index, item) in grantResults.withIndex()) {
-                if (item == PackageManager.PERMISSION_GRANTED) {
-                    resultList?.add(permissions.get(index = index))
-                } else {
-                    var i = permissions.get(index = index)
-                    var specialResult = MoPermission.moPermissionAdapter.checkPermission(this, i)
-                    if (specialResult == 0) {
-                        noResultList?.add(i)
-                    } else if (specialResult > 0) {
-                        resultList?.add(i)
-                    } else {
-                        noResultList?.add(i)
-                    }
-                }
-            }
-            if (noResultList.isNullOrEmpty()) {
-                //所有权限申请成功
-                MoPermissionBus.getInstance()?.sendData(responseKey!!, permission!!.asList())
-                finish()
-                return
-            }
-
-            if (!necessary) {
-                //如果非必要权限 则直接关闭，返回已获取的权限
-                specialCheckDialog()
-            } else {
-                doubleCheckDialog()
-            }
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
-
-    /**
-     * 权限申请
-     */
-    private fun requestPermissions() {
-        requestPermissions(permission!!, 0x101)
-    }
-
-    /**
-     * 必须权限获取结果判断专用
-     */
-    private fun doubleCheckDialog() {
-        if (noResultList.isNullOrEmpty()) {
-            MoPermissionBus.getInstance()?.sendData(responseKey!!, resultList)
+    private fun showRequestPermissionDialog() {
+        showDialog(title, warnDesc, yesStr, noStr, View.OnClickListener {
+            requestPermissions()
+            dismissDialog()
+        }, View.OnClickListener {
+            MoPermissionBus.getInstance()?.sendData(responseKey!!, getPermissionEnableList())
             dismissDialog()
             finish()
-            return
-        }
-        //必要权限，弹框
-        if (canContinueRequest(noResultList)) {
-            //依然可以使用系统方式获取权限
-            showDialog(title, warnDesc, yesStr, noStr, View.OnClickListener {
-                requestPermissions()
-                dismissDialog()
-            }, View.OnClickListener {
-                MoPermissionBus.getInstance()?.sendData(responseKey!!, resultList)
-                dismissDialog()
-                finish()
-            })
+        })
+    }
+
+    private fun requestPermissions() {
+        if (!needRequestNormalPermission() && !needRequestSpecialPermission()) {
+            MoPermissionBus.getInstance()?.sendData(responseKey!!, getPermissionEnableList())
+            dismissDialog()
+            finish()
         } else {
-            //用户勾选不再提示，所以转而使用跳转系统设置去修改权限
-            showDialog(title, warnDesc, yesStr, noStr, View.OnClickListener {
-                //跳转到系统设置去开启权限
-                jumpToSystem = true
-                if (!MoPermission.moPermissionAdapter.requestPermission(this, noResultList!![0])) {
-                    requestPermissionSetting(this)
-                }
-            }, View.OnClickListener {
-                MoPermissionBus.getInstance()?.sendData(responseKey!!, resultList)
-                dismissDialog()
-                finish()
-            })
+            if (requestNormalPermissions()) {
+                return
+            }
+            if (requestSpecialPermissions()) {
+                return
+            }
+            MoPermissionBus.getInstance()?.sendData(responseKey!!, getPermissionEnableList())
+            dismissDialog()
+            finish()
         }
     }
 
-    /**
-     * 判断权限是否可以使用系统默认方式申请
-     */
-    private fun canContinueRequest(permission: List<String>?): Boolean {
-        if (permission == null) {
+    private fun requestNormalPermissions(): Boolean {
+        val waitNormalRequest = arrayListOf<String>()
+        val waitSystemRequest = arrayListOf<String>()
+        normalPermission.forEach {
+            if (!it.isEnable && (necessary || it.requestCount == 0)) {
+                if (!shouldShowRequestPermissionRationale(
+                        this@MoPermissionActivity,
+                        it.permission
+                    )
+                ) {  //正常申请
+                    it.accumulateRequestCount()
+                    waitNormalRequest.add(it.permission)
+                } else {
+                    //用户勾选不再提示，需要跳转系统设置页开启
+                    waitSystemRequest.add(it.permission)
+                }
+            }
+        }
+        if (waitNormalRequest.isNotEmpty()) {
+            requestPermissions(waitNormalRequest.toTypedArray(), 0x101)
+            return true
+        } else if (waitSystemRequest.isNotEmpty()) {
+            waitSystemRequest.forEach { i ->
+                normalPermission.forEach { j ->
+                    if (TextUtils.equals(i, j.permission)) {
+                        j.accumulateRequestCount()
+                    }
+                }
+            }
+            requestPermissionSetting(this)
+            jumpToSystem = true
+            return true
+        } else {
             return false
         }
-        for (item in permission) {
-            if (shouldShowRequestPermissionRationale(item)) {
+    }
+
+    private fun requestSpecialPermissions(): Boolean {
+        for (i in 0 until specialPermission.size) {
+            var item = specialPermission[i]
+            if (!item.isEnable && (necessary || item.requestCount == 0)) {
+                item.accumulateRequestCount()
+                if (!MoPermission.moPermissionAdapter.requestPermission(this, item.permission)) {
+                    requestPermissionSetting(this)
+                }
+                jumpToSystem = true
                 return true
             }
         }
         return false
     }
 
-    /**
-     * 非必须权限的特殊权限申请以及结果输出专用
-     */
-    private fun specialCheckDialog() {
-        if (specialPermission.isNullOrEmpty()) {
-            MoPermissionBus.getInstance()?.sendData(responseKey!!, resultList)
-            finish()
-            return
-        } else {
-            val item = specialPermission.first()
-            specialPermission.removeAt(0)
-            if (resultList!!.contains(item)) {
-                specialCheckDialog()
-                return
+    private fun checkPermissions() {
+        if (normalPermission.isNotEmpty()) {
+            normalPermission.forEach {
+                it.isEnable = MoPermission.checkPermission(this, it.permission)
             }
-            showDialog(title, warnDesc, yesStr, noStr, View.OnClickListener {
-                if (!MoPermission.moPermissionAdapter.requestPermission(this, noResultList!![0])) {
-                    specialCheckDialog()
-                } else {
-                    jumpToSystem = true
-                }
-            }, View.OnClickListener {
-                dismissDialog()
-                specialCheckDialog()
-            })
         }
+        if (specialPermission.isNotEmpty()) {
+            specialPermission.forEach {
+                it.isEnable = MoPermission.checkPermission(this, it.permission)
+            }
+        }
+    }
+
+    private fun getPermissionEnableList(): ArrayList<String> {
+        val result = arrayListOf<String>()
+        if (normalPermission.isNotEmpty()) {
+            normalPermission.forEach {
+                if (it.isEnable) {
+                    result.add(it.permission)
+                }
+            }
+        }
+        if (specialPermission.isNotEmpty()) {
+            specialPermission.forEach {
+                if (it.isEnable) {
+                    result.add(it.permission)
+                }
+            }
+        }
+        return result
+    }
+
+    private fun needRequestNormalPermission(): Boolean {
+        if (normalPermission.isNotEmpty()) {
+            normalPermission.forEach {
+                if (!it.isEnable && (necessary || it.requestCount == 0)) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    private fun needRequestSpecialPermission(): Boolean {
+        if (specialPermission.isNotEmpty()) {
+            specialPermission.forEach {
+                if (!it.isEnable && (necessary || it.requestCount == 0)) {
+                    return true
+                }
+            }
+        }
+        return false
     }
 
     /**
@@ -346,5 +304,58 @@ class MoPermissionActivity : AppCompatActivity() {
 
     private fun dialogIsShow(): Boolean {
         return moPermissionDialog?.isShowing ?: false
+    }
+
+    private var jumpToSystem: Boolean = false
+    override fun onResume() {
+        super.onResume()
+        if (jumpToSystem) {
+            jumpToSystem = false
+            checkPermissions()
+            if (!needRequestNormalPermission() && !needRequestSpecialPermission()) {
+                MoPermissionBus.getInstance()
+                    ?.sendData(responseKey!!, getPermissionEnableList())
+                return
+            }
+            if (!dialogIsShow()) {
+                showRequestPermissionDialog()
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        MoPermissionBus.getInstance()?.removeLiveData(responseKey)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 0x101 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            for ((index, item) in grantResults.withIndex()) {
+                normalPermission.forEach {
+                    if (TextUtils.equals(it.permission, permissions[index])) {
+                        it.isEnable = item == PackageManager.PERMISSION_GRANTED
+                    }
+                }
+                specialPermission.forEach {
+                    if (TextUtils.equals(it.permission, permissions[item])) {
+                        it.isEnable = item == PackageManager.PERMISSION_GRANTED
+                    }
+                }
+            }
+            if (needRequestNormalPermission() || needRequestSpecialPermission()) {
+                if (!dialogIsShow()) {
+                    showRequestPermissionDialog()
+                }
+            } else {
+                dismissDialog()
+                MoPermissionBus.getInstance()?.sendData(responseKey!!, getPermissionEnableList())
+                finish()
+            }
+        }
     }
 }

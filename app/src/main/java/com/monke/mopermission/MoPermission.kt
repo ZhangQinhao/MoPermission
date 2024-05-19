@@ -182,24 +182,6 @@ open class MoPermission {
         }
 
         @JvmStatic
-        @SuppressLint("NewApi")
-        fun getNoPermissionLimitOne(context: Context, vararg permission: String): String? {
-            if (permission.isEmpty()) {
-                return null
-            }
-            if (getSdkInt() < Build.VERSION_CODES.M) {
-                return null
-            }
-
-            for (item in permission) {
-                if (!checkPermission(context, item)) {
-                    return item
-                }
-            }
-            return null
-        }
-
-        @JvmStatic
         fun checkPermission(context: Context, permission: String): Boolean {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                 return true
