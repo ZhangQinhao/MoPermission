@@ -3,12 +3,12 @@
   
 ### 引入
 
-在build.gradle引入  `implementation 'io.github.zhangqinhao:MoPermission:1.0.6'`
+在build.gradle引入  `implementation 'io.github.zhangqinhao:MoPermission:1.0.8'`
 
 ### 使用
 ![enter description here][1]
 
-#### 非必要权限获取（默认申请权限，如果用户选取取消且不再提示，则不做兜底操作）
+#### 非必要权限获取（默认申请权限，所有权限只申请一次）
 ``` stylus
 MoPermission.Companion.requestPermission(MainActivity.this, new OnRequestPermissionListener() {
                     @Override
@@ -35,7 +35,7 @@ MoPermission.Companion.requestPermission(MainActivity.this, new OnRequestPermiss
 ```
 
 
-#### 申请必要权限 (如果用户未获取相关权限则弹窗提示再次申请，如果用户选取取消且不再提示，则手动申请后跳转到系统权限设置页)
+#### 申请必要权限 (如果用户未获取相关权限则弹窗提示再次申请，如果用户选取取消且不再提示，则手动申请后跳转到系统权限设置页，只能通过弹窗取消退出)
 ``` stylus
 MoPermission.Companion.requestNecessaryPermission(MainActivity.this, "权限申请", "获取摄像头与短信发送权限", "申请", "退出", new OnRequestNecessaryPermissionListener() {
                     @Override
@@ -50,7 +50,7 @@ MoPermission.Companion.requestNecessaryPermission(MainActivity.this, "权限申�
                 }, CustomPermissionDialog.class, Manifest.permission.CAMERA, Manifest.permission.SEND_SMS);
 ```
 
-#### 自定义特殊权限适配器
+#### 自定义特殊权限适配器(由于权限过多，可以通过注册权限适配器来扩展框架中不支持的权限)
 ``` stylus
 MoPermission.registerPermissionAdapter(new MoPermissionBaseAdapter() {
             @Override
