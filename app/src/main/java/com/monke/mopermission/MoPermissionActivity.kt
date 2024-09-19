@@ -343,7 +343,7 @@ class MoPermissionActivity : AppCompatActivity() {
                     }
                 }
                 specialPermission.forEach {
-                    if (TextUtils.equals(it.permission, permissions[item])) {
+                    if (TextUtils.equals(it.permission, permissions[index])) {
                         it.isEnable = item == PackageManager.PERMISSION_GRANTED
                     }
                 }

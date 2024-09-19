@@ -3,7 +3,7 @@
   
 ### 引入
 
-在build.gradle引入  `implementation 'io.github.zhangqinhao:MoPermission:1.0.8'`
+在build.gradle引入  `implementation 'io.github.zhangqinhao:MoPermission:1.0.9'`
 
 ### 使用
 ![enter description here][1]
